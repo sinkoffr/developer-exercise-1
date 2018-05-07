@@ -13,7 +13,8 @@ If you prefer to use a package manager, we recommend to use Yarn.
 
 Please provide the following functionality:
 
- * Required: Fetch quotes from the source [quotes.json](https://gist.githubusercontent.com/anonymous/8f61a8733ed7fa41c4ea/raw/1e90fd2741bb6310582e3822f59927eb535f6c73/quotes.json) and display the available information in a list-like structure (table/list)
+ * Required: Fetch quotes from the source [quotes.json](https://gist.githubusercontent.com/anonymous/8f61a8733ed7fa41c4ea/raw/1e90fd2741bb6310582e3822f59927eb535f6c73/quotes.json) 
+ *      and display the available information in a list-like structure (table/list)
  * Required: Provide client-side pagination (up to 15 quotes per page)
  * Optional: Provide a way to filter between game and movie quotes
  * Optional: Provide a client-side search that filters by the quote text
@@ -32,10 +33,10 @@ Please write a module that gives `where` behavior to an array of hashes. (See `t
 
 Your implementation should satisfy the following use cases and Blackjack rules:
 
- * As a Player I can get a hand with two cards in it
- * As a Dealer I can get a hand with two cards in it
- * As a Player I can see what card the dealer is showing
- * As a Player I can bust (lose immediately) when I am getting cards
+ * As a Player I can get a hand with two cards in it 
+ * As a Dealer I can get a hand with two cards in it 
+ * As a Player I can see what card the dealer is showing 
+ * As a Player I can bust (lose immediately) when I am getting cards 
  * As a Player I can blackjack (win immediately) when I am dealt cards (this is a simplification)
  * As a Dealer I can draw cards after the player until I win or lose
 

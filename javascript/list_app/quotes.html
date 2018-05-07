@@ -3,21 +3,193 @@
 <html>
 <head>
   <title>List App</title>
-  <script src="http://code.jquery.com/jquery-latest.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.js"></script>
 </head>
+
 <body>
   <div id="quotes"></div>
   <script type="text/babel">
-    ReactDOM.render(
-      <div>
-        <h1>Quotes</h1>
-      </div>,
-      document.getElementById('quotes')
-    );
+  
+    const urlForQuotes = `https://gist.githubusercontent.com/anonymous/8f61a8733ed7fa41c4ea/raw/1e90fd2741bb6310582e3822f59927eb535f6c73/quotes.json`
+
+    const propTypes = {
+      items: React.PropTypes.array.isRequired,
+      onChangePage: React.PropTypes.func.isRequired,
+      initialPage: React.PropTypes.number    
+    }
+    
+    const defaultProps = {
+      initialPage: 1
+    }
+    
+    class Quotes extends React.Component {
+      
+      constructor(props) {
+        super(props)
+        this.state = {
+          quotes: "",
+          pageOfItems: []
+        };
+        
+        this.onChangePage = this.onChangePage.bind(this);
+      }
+      
+      onChangePage(pageOfItems) {
+        this.setState({ pageOfItems: pageOfItems });
+      }
+      
+      componentDidMount() {
+        fetch(urlForQuotes)
+        .then(response => {
+          if (!response.ok) {
+            throw Error("Network request failed")
+          }
+          return response
+        })
+        .then(d => d.text())
+        .then(d => {
+          this.setState({
+            quotes: d
+          })
+        }, () => {
+          this.setState({
+            requestFailed: true
+          })
+        })
+      }
+    
+      render() {
+  
+        if (this.state.requestFailed) {
+          return <p>Failed!</p>
+        }
+        
+        return (
+          <div>
+            <h2>Quotes</h2>
+            <h2>{this.state.quotes}</h2>
+          </div>
+        )
+      }
+  
+    }
+    
+    class Paginate extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = { paginate: {} }
+      }
+      
+      componentWillMount() {
+        if (this.props.items && this.props.items.length) {
+          this.setPage(this.props.initialPage);
+        }
+      }
+      
+      componentDidUpdate(prevProps, prevState) {
+        if (this.props.items !== prevProps.items) {
+          this.setPage(this.props.initialPage)
+        }
+      }
+      
+      setPage(page) {
+        let items = this.props.items;
+        let paginate = this.props.paginate;
+        
+        if (page < 1 || page > paginate.totalPages) {
+          return;
+        }
+        
+        paginate = this.getPager(items.length, page);
+        var pageOfItems = items.slice(pager.startIndex, pager.endIndex + 1);
+        
+        this.setState({ paginate: paginate });
+        
+        this.props.onChangePage(pageOfItems);
+      }
+      
+      getPager(totalItems, currentPage, pageSize) {
+        currentPage = currentPage || 1;
+        
+        pageSize = pageSize || 15;
+        
+        let totalPages = Math.ceil(totalItems / pageSize);
+        
+        let startPage, endPage;
+        if (totalPages <= 10) {
+          startPage = 1;
+          endPage = totalPages;
+        } else {
+          if (currentPage <= 6) {
+            startPage = 1;
+            endPage = 10;
+          } else if (currentPage + 4 >= totalPages) {
+            startPage = totalPages - 9;
+            endPage = totalPages;
+          } else {
+            startPage = currentPage - 5;
+            endPage = currentPage + 4;
+          }
+        }
+        
+        let startIndex = (currentPage - 1) * pageSize;
+        let endIndex = Math.min(startIndex + pageSize - 1, totalItems - 1);
+        
+        let pages = [...Array((endPage + 1) - startPage).keys()].map(i => startPage + i);
+        
+        return {
+          totalItems: totalItems,
+          currentPage: currentPage,
+          pageSize: pageSize,
+          totalPages: totalPages,
+          startPage: startPage,
+          endPage: endPage,
+          startIndex: startIndex,
+          endIndex: endIndex,
+          pages: pages
+        };
+      }
+      
+      render() {
+        let pager = this.state.pager;
+        
+        if (!pager.pages || pager.pages.length <= 1) {
+          return null;
+        }
+        
+        return (
+          <ul className="paginate">
+            <li className={pager.currentPage === 1 ? 'disabled' : ''}>
+              <a onClick={() => this.setPage(1)}>First</a>
+            </li>
+            <li className={pager.currentPage === 1 ? 'disabled' : ''}>
+              <a onClick={() => this.setPage(pager.currentPage - 1)}>Previous</a>
+            </li>
+            {pager.pages.map((page, index) => 
+              <li key={index} className={pager.currentPage === page ? 'active' : ''}>
+                <a onClick={() => this.setPage(page)}>{page}</a>
+              </li>
+            )}
+            <li className={pager.currentPage === pager.totalPages ? 'disabled' : ''}>
+              <a onClick={() => this.setPage(pager.currentPage + 1)}>Next</a>
+            </li>
+            <li className={pager.currentPage === pager.totalPages ? 'disabled' : ''}>
+              <a onClick={() => this.setPage(pager.currentPage + 1)}>Last</a>
+            </li>
+          </ul>
+        );
+      }
+    }
+    
+    Paginate.propTypes = propTypes;
+    Paginate.defaultProps = defaultProps;
+   
+  
+    ReactDOM.render(<Quotes />, document.getElementById('quotes'));
+      
+    
   </script>
 </body>
 </html>
